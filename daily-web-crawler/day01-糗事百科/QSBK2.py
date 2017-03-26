@@ -1,4 +1,4 @@
-#-*—coding:utf8-*-
+#-*—coding:utf8-*- 
 #糗事百科，发布人，笑话内容，去除有图片的笑话
 
 import requests
