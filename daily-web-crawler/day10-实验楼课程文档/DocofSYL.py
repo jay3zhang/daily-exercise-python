@@ -16,6 +16,7 @@ header = {
 for page in range(2036,2054+1):
     #用一个for循环改变url
     url = 'https://www.shiyanlou.com/courses/596/labs/{}/document'.format(page)
+   
     try:
         r = requests.get(url,headers=header)
         #print(r.status_code)  #检查连接状态，200为正常

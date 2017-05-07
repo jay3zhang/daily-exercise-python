@@ -1,5 +1,5 @@
 # -*- coding:utf8 -*-
-
+#python2
 from Tkinter import *
 from ScrolledText import ScrolledText
 import threading
