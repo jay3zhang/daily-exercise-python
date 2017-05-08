@@ -1,6 +1,8 @@
 # coding=utf-8
 '''
-获取当天的就业信息，转换格式，发送邮件提醒，一则消息发一封邮件
+获取当天的就业信息，
+发送邮件提醒，一则消息发一封邮件
+发送微信提醒
 '''
 
 import requests
@@ -26,7 +28,7 @@ def get_today_link():
     divs = soup.find_all('div', attrs={'class':'mt_10 mb_10'})
     for div in divs:
         link = div.span.a.attrs['href'].split('/',2)[2]
-        time = re.findall(r'\d+-\d+-\d+', div.text, re.S)[0]    # type(time)=str
+        time = re.findall(r'\d+-\d+-\d+', div.text, re.S)[0]    # type(time)=str，这个标签下文字有点乱所以用了re模块，也可用split()切割两次
         # print(link,time)
         if time==ctime:
             today_list.append(link)
@@ -49,11 +51,12 @@ def get_today_message(link_list):
         page['title']=mess_soup.h1.string
         page['content'] = mess_soup.find('div', attrs={'id':'vsb_content'}).text   # 本来要做内容清理，测试了下内容很干净，不用清理
         page['link'] = mess_url
+        page['date'] = ctime
         message.append(page)
 
     return message
 
-import email_account
+import email_account    # 邮件发送着信息
 import email_list    # 邮件接收者列表
 def send_email(message):
     smtpserver = 'smtp.163.com'  # 发送者的邮箱服务器
@@ -66,7 +69,7 @@ def send_email(message):
         msg = MIMEText('', 'html', 'utf-8')
         msg['Subject'] = Header(ctime+'无消息', 'utf-8')
     else:
-        text = '标题：'+'\t'+message.get('title')+'\n' +\
+        text = '标题：'+'\t'+message.get('title')+'\n' + message.get('date') +\
                 '正文：'+'\n'+message.get('content')+'\n' +\
             '原文链接：'+'\t'+message.get('link')
 
@@ -85,17 +88,51 @@ def send_email(message):
         smtp.sendmail(sender, receiver, msg.as_string())
     smtp.quit()
 
+from wxpy import *
+bot = Bot(cache_path=True)
+def wechat_notice(message):
+    # 机器人账号自身
+    myself = bot.self
 
+    # 构建wechat要发送的信息
+    msg = message.get('title')+'\n'+message.get('date')+'\n'+message.get('link')
 
-if __name__=='__main__':
-    # 获取当日时间    str类型
-    ctime = time.strftime('%Y-%m-%d', time.localtime(time.time()))
-    # print(ctime)
-    # ctime = '2017-05-05'
-    today_link=get_today_link()
+    # 向文件传输助手发送消息
+    bot.file_helper.send(msg)
+
+    # 查找群聊
+    to_group = bot.groups().search('陆壹伍')
+    if to_group:
+        # print(to_group)
+           ## 发送群聊消息
+        to_group[0].send_msg(msg)
+
+    # embed()
+    # bot.join()  #进程应该在调用函数中阻塞，否则后面的消息发送
+
+def send():
+    today_link = get_today_link()
     message = get_today_message(today_link)
     # 没有消息不发送邮件
     if message:
+        print(len(message))
         for item in message:
-            send_email(item)
+            # send_email(item)
+            wechat_notice(item)
 
+    bot.join()  # 堵塞bot线程，持续监听
+
+if __name__=='__main__':
+    #定时任务
+    while True:
+        # 获取当日时间    str类型
+        ctime = time.strftime('%Y-%m-%d', time.localtime(time.time()))
+        # ctime = '2017-04-28'
+        # print(ctime)
+        current_time = time.localtime(time.time())
+        time1 = (current_time.tm_hour == 12) and (current_time.tm_min == 0) and (current_time.tm_sec == 0)
+        time2 = (current_time.tm_hour == 18) and (current_time.tm_min == 0) and (current_time.tm_sec == 0)
+        ## time2 = True
+        if (time1 or time2):
+            send()
+        time.sleep(2)
