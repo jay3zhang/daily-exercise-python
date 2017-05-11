@@ -10,9 +10,9 @@ import re
 import time
 from bs4 import BeautifulSoup
 # 发送邮件需要的模块
-import smtplib
-from email.mime.text import MIMEText
-from email.header import Header
+# import smtplib
+# from email.mime.text import MIMEText
+# from email.header import Header
 
 
 def get_today_link():
@@ -47,49 +47,54 @@ def get_today_message(link_list):
         mess_r.encoding = 'utf-8'
         # print(r.status_code)
         mess_soup = BeautifulSoup(mess_r.text, 'html.parser')
+        time_text = mess_soup.find_all('div', attrs={'class':'mt_10 mb_10'})[0].string
+        msg_time = re.search(r'\d+:\d+',time_text, re.S)
+        print(msg_time,last_time)
+        if msg_time>last_time:
+            continue
         page={}
         page['title']=mess_soup.h1.string
         page['content'] = mess_soup.find('div', attrs={'id':'vsb_content'}).text   # 本来要做内容清理，测试了下内容很干净，不用清理
         page['link'] = mess_url
-        page['date'] = ctime
+        page['date'] = str(ctime+'\t'+msg_time)
         message.append(page)
 
     return message
 
-import email_account    # 邮件发送着信息
-import email_list    # 邮件接收者列表
-def send_email(message):
-    smtpserver = 'smtp.163.com'  # 发送者的邮箱服务器
-    user = email_account.username
-    password = email_account.password
-    sender = email_account.username  # 发送者
-
-    # 编写邮件正文
-    if len(message)==0:
-        msg = MIMEText('', 'html', 'utf-8')
-        msg['Subject'] = Header(ctime+'无消息', 'utf-8')
-    else:
-        text = '标题：'+'\t'+message.get('title')+'\n' + message.get('date') +\
-                '正文：'+'\n'+message.get('content')+'\n' +\
-            '原文链接：'+'\t'+message.get('link')
-
-        msg = MIMEText(text, 'plain', 'utf-8')
-        msg['Subject'] = Header(message.get('title'), 'utf-8')
-    # 必须有这两个参数，否则网易邮箱会视为垃圾邮件，拒发
-    msg['From'] = sender
-    # msg['To'] = receiver
-
-    # 发送邮件
-    smtp = smtplib.SMTP()
-    smtp.connect(smtpserver)
-    smtp.login(user, password)
-    for receiver in email_list.to_list:
-        msg['To'] = receiver
-        smtp.sendmail(sender, receiver, msg.as_string())
-    smtp.quit()
+# import email_account    # 邮件发送着信息
+# import email_list    # 邮件接收者列表
+# def send_email(message):
+#     smtpserver = 'smtp.163.com'  # 发送者的邮箱服务器
+#     user = email_account.username
+#     password = email_account.password
+#     sender = email_account.username  # 发送者
+#
+#     # 编写邮件正文
+#     if len(message)==0:
+#         msg = MIMEText('', 'html', 'utf-8')
+#         msg['Subject'] = Header(ctime+'无消息', 'utf-8')
+#     else:
+#         text = '标题：'+'\t'+message.get('title')+'\n' + message.get('date') +\
+#                 '正文：'+'\n'+message.get('content')+'\n' +\
+#             '原文链接：'+'\t'+message.get('link')
+#
+#         msg = MIMEText(text, 'plain', 'utf-8')
+#         msg['Subject'] = Header(message.get('title'), 'utf-8')
+#     # 必须有这两个参数，否则网易邮箱会视为垃圾邮件，拒发
+#     msg['From'] = sender
+#     # msg['To'] = receiver
+#
+#     # 发送邮件
+#     smtp = smtplib.SMTP()
+#     smtp.connect(smtpserver)
+#     smtp.login(user, password)
+#     for receiver in email_list.to_list:
+#         msg['To'] = receiver
+#         smtp.sendmail(sender, receiver, msg.as_string())
+#     smtp.quit()
 
 from wxpy import *
-bot = Bot(cache_path=True)
+bot = Bot(cache_path=True,console_qr=True)
 def wechat_notice(message):
     # 机器人账号自身
     myself = bot.self
@@ -120,6 +125,7 @@ def send():
             # send_email(item)
             wechat_notice(item)
 
+    # last_time = time.strftime('%H:%M', time.localtime(time.time()))
     bot.join()  # 堵塞bot线程，持续监听
 
 if __name__=='__main__':
@@ -130,9 +136,16 @@ if __name__=='__main__':
         # ctime = '2017-04-28'
         # print(ctime)
         current_time = time.localtime(time.time())
+        time0 = (current_time.tm_hour == 9) and (current_time.tm_min == 0) and (current_time.tm_sec == 0)
         time1 = (current_time.tm_hour == 12) and (current_time.tm_min == 0) and (current_time.tm_sec == 0)
         time2 = (current_time.tm_hour == 18) and (current_time.tm_min == 0) and (current_time.tm_sec == 0)
+        time3 = (current_time.tm_hour == 22) and (current_time.tm_min == 0) and (current_time.tm_sec == 0)
         ## time2 = True
-        if (time1 or time2):
+        flag = time0 or time1 or time2 or time3
+        if (flag):
+            # mtime = time.strftime('%H:%M', time.localtime(time.time()))
+            global last_time
+            last_time = '0'
             send()
+            last_time = time.strftime('%H:%M', time.localtime(time.time()))
         time.sleep(2)
