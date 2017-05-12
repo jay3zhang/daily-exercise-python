@@ -1,7 +1,6 @@
 # coding=utf-8
 '''
 获取当天的就业信息，
-发送邮件提醒，一则消息发一封邮件
 发送微信提醒
 '''
 
@@ -9,10 +8,6 @@ import requests
 import re
 import time
 from bs4 import BeautifulSoup
-# 发送邮件需要的模块
-# import smtplib
-# from email.mime.text import MIMEText
-# from email.header import Header
 
 
 def get_today_link():
@@ -24,7 +19,7 @@ def get_today_link():
     r.encoding = 'utf-8'
     # print(r.status_code)
     soup = BeautifulSoup(r.text,'html.parser')
-    # 抓取链接和时间
+    # 抓取链接和日期
     divs = soup.find_all('div', attrs={'class':'mt_10 mb_10'})
     for div in divs:
         link = div.span.a.attrs['href'].split('/',2)[2]
@@ -47,53 +42,28 @@ def get_today_message(link_list):
         mess_r.encoding = 'utf-8'
         # print(r.status_code)
         mess_soup = BeautifulSoup(mess_r.text, 'html.parser')
-        time_text = mess_soup.find_all('div', attrs={'class':'mt_10 mb_10'})[0].string
-        msg_time = re.search(r'\d+:\d+',time_text, re.S)
+        time_text = mess_soup.find_all('div', attrs={'class':'mt_10 mb_10'})[0].text
+        #print(time_text)
+        # 获取信息的发布时间，与上一次运行时间对比，解析在上一次运行之后发布的消息
+        msg_time = re.search(r'\d+:\d+',time_text, re.S).group()
+        msg_time = ctime+'_'+msg_time
         print(msg_time,last_time)
-        if msg_time>last_time:
+        #if ctime>last_dtime and msg_time>last_time:
+        if msg_time<last_time:
+            print('oooo')
             continue
         page={}
         page['title']=mess_soup.h1.string
         page['content'] = mess_soup.find('div', attrs={'id':'vsb_content'}).text   # 本来要做内容清理，测试了下内容很干净，不用清理
         page['link'] = mess_url
-        page['date'] = str(ctime+'\t'+msg_time)
+        page['date'] = msg_time
         message.append(page)
 
     return message
 
-# import email_account    # 邮件发送着信息
-# import email_list    # 邮件接收者列表
-# def send_email(message):
-#     smtpserver = 'smtp.163.com'  # 发送者的邮箱服务器
-#     user = email_account.username
-#     password = email_account.password
-#     sender = email_account.username  # 发送者
-#
-#     # 编写邮件正文
-#     if len(message)==0:
-#         msg = MIMEText('', 'html', 'utf-8')
-#         msg['Subject'] = Header(ctime+'无消息', 'utf-8')
-#     else:
-#         text = '标题：'+'\t'+message.get('title')+'\n' + message.get('date') +\
-#                 '正文：'+'\n'+message.get('content')+'\n' +\
-#             '原文链接：'+'\t'+message.get('link')
-#
-#         msg = MIMEText(text, 'plain', 'utf-8')
-#         msg['Subject'] = Header(message.get('title'), 'utf-8')
-#     # 必须有这两个参数，否则网易邮箱会视为垃圾邮件，拒发
-#     msg['From'] = sender
-#     # msg['To'] = receiver
-#
-#     # 发送邮件
-#     smtp = smtplib.SMTP()
-#     smtp.connect(smtpserver)
-#     smtp.login(user, password)
-#     for receiver in email_list.to_list:
-#         msg['To'] = receiver
-#         smtp.sendmail(sender, receiver, msg.as_string())
-#     smtp.quit()
 
 from wxpy import *
+# linux命令行下运行需要设置console_qr为True，需要pillow库支持
 bot = Bot(cache_path=True,console_qr=True)
 def wechat_notice(message):
     # 机器人账号自身
@@ -126,7 +96,7 @@ def send():
             wechat_notice(item)
 
     # last_time = time.strftime('%H:%M', time.localtime(time.time()))
-    bot.join()  # 堵塞bot线程，持续监听
+    
 
 if __name__=='__main__':
     #定时任务
@@ -140,12 +110,14 @@ if __name__=='__main__':
         time1 = (current_time.tm_hour == 12) and (current_time.tm_min == 0) and (current_time.tm_sec == 0)
         time2 = (current_time.tm_hour == 18) and (current_time.tm_min == 0) and (current_time.tm_sec == 0)
         time3 = (current_time.tm_hour == 22) and (current_time.tm_min == 0) and (current_time.tm_sec == 0)
-        ## time2 = True
+        # time2 = True
         flag = time0 or time1 or time2 or time3
-        if (flag):
-            # mtime = time.strftime('%H:%M', time.localtime(time.time()))
-            global last_time
-            last_time = '0'
+       
+        last_time = '0'
+        if (flag):                      
             send()
-            last_time = time.strftime('%H:%M', time.localtime(time.time()))
+            # 记录上次运行时间
+            last_time = time.strftime('%Y-%m-%d_%H:%M', time.localtime(time.time()))
+            print(last_time)
+            bot.join()  # 堵塞bot线程，持续监听
         time.sleep(2)
