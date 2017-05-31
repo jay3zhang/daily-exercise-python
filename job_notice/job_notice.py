@@ -76,11 +76,11 @@ def wechat_notice(message):
     bot.file_helper.send(msg)
 
     # 查找群聊
-    to_group = bot.groups().search('陆壹伍')
-    if to_group:
-        # print(to_group)
-           ## 发送群聊消息
-        to_group[0].send_msg(msg)
+    # to_group = bot.groups().search('陆壹伍')
+    # if to_group:
+        # # print(to_group)
+           # ## 发送群聊消息
+        # to_group[0].send_msg(msg)
 
     # embed()
     # bot.join()  #进程应该在调用函数中阻塞，否则后面的消息发送
@@ -100,6 +100,7 @@ def send():
 
 if __name__=='__main__':
     #定时任务
+    last_time = '0'
     while True:
         # 获取当日时间    str类型
         ctime = time.strftime('%Y-%m-%d', time.localtime(time.time()))
@@ -112,12 +113,12 @@ if __name__=='__main__':
         time3 = (current_time.tm_hour == 22) and (current_time.tm_min == 0) and (current_time.tm_sec == 0)
         # time2 = True
         flag = time0 or time1 or time2 or time3
-       
-        last_time = '0'
+        
         if (flag):                      
             send()
             # 记录上次运行时间
             last_time = time.strftime('%Y-%m-%d_%H:%M', time.localtime(time.time()))
             print(last_time)
-            bot.join()  # 堵塞bot线程，持续监听
+            
         time.sleep(2)
+    bot.join()  # 堵塞bot线程，持续监听
