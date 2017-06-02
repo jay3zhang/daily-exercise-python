@@ -1,9 +1,9 @@
 #
+daily-web-crawler/
+!daily-web-crawler/**/*.py
+!daily-web-crawler/**/*.md
+
 LICENSE
+*.png
 daily-algorithm/algoenv
 daily-algorithm/pythonTip/test.py
-
-daily-web-crawler/*
-!daily-web-crawler/*/*.py
-!daily-web-crawler/*/*.md
-
