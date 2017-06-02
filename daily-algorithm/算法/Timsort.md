@@ -62,3 +62,7 @@ Timsort排序算法中定义数组中的有序片段为run，每个run都要求�
 
 在大多数情况下，这个问题没什么大不了，不影响我们平时一般的排序操作，因为我们的数据没有那么多，更不会大量出现上述情况。但是这个国外技术团队精心构造了一个Array，成功的让Timsort算法报了java.lang.ArrayIndexOutOfBoundsException这个错误。他们还把复现这个错误的代码放在了github上，代码请戳[这里](https://github.com/abstools/java-timsort-bug)
 
+* Timsort 相关资料：
+1. [vimeo.com/146478455](https://vimeo.com/146478455) 概要的讲解timsort的实现以及timsort的bugs，因为是视频，所以相比论文我觉得更快看得懂，没字幕，听不懂怎么办，没事，[演讲者有一个文章重新梳理视频内容](http://www.envisage-project.eu/proving-android-java-and-python-sorting-algorithm-is-broken-and-how-to-fix-it/)
+
+2. Tim peters自己写的论文  https://svn.python.org/projects/python/trunk/Objects/listsort.txt

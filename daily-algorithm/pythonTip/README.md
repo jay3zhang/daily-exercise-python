@@ -1,0 +1,1 @@
+题目来源于[pythonTip](http://www.pythontip.com/)，练习python的使用
