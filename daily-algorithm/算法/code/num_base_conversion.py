@@ -30,7 +30,7 @@ def conver_to_2(num):
     while num>0:    # num大于0时，不断除于2，余数入栈
         rem = num % 2
         remstack.push(rem)
-        num = num / 2
+        num = num // 2
     
     tostr = ''
     while not remstack.isEmpty():
@@ -46,13 +46,21 @@ def ten_converto_x(num,n):
     while num>0:
         rem = num % n
         remstack.push(rem)
-        num = num / n
+        num = num // n
 
     tostr = ''
     while not remstack.isEmpty():
         tostr = tostr + digits[remstack.pop()]
         
     return tostr
+    
+def num_tostr(num,n):
+    # 递归，10进制转n进制
+    digits = '0123456789ABCDEF'
+    if num<n:
+        return digits[num]
+    else:
+        return num_tostr(num//n,n)+digits[num%n]
 
 def y_converto_ten(num,n):
     # n进制转10进制(n<=16)

@@ -74,14 +74,28 @@ class OrderList:
 
     
     def index(self,item):
-        pass
+        current = self.head
+        pos =0
+        while current!= None:
+            if current.data==item:
+                return pos
+            else:
+                pos = pos +1
+                current = current.next
+        return None
         
-    def append(self,item):
-        pass
-        
-    def insert(self,item):
-        pass
-        
-    def pop(self,index=0):
-        pass
+    # 有序列表不需要append(),insert()函数，add()函数包括了相关功能
+    
+    def pop(self,pos=0):
+        current = self.head
+        index = 0
+        item = None
+        while current!=None:
+            if index==pos:
+                item = current.data
+                remove(current.data)
+            else:
+                index = index+1
+                current = current.next
+        return item
         

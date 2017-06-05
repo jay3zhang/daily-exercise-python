@@ -5,7 +5,8 @@
 def anagramSolution2(s1,s2):
     alist1 = list(s1)
     alist2 = list(s2)
-
+    
+    
     alist1.sort()
     alist2.sort()
 
@@ -23,6 +24,7 @@ def anagramSolution2(s1,s2):
 
     return matches
 
+print(anagramSolution2('this is o','o is isth'))
 # print(anagramSolution2('abcde','edcba'))
 # print(anagramSolution2('abcdf','edcba'))
 
@@ -52,6 +54,6 @@ def anagramSolution3(s1,s2):
 
     return stillOK
 
-print(anagramSolution3('apple','pleap'))
-print(anagramSolution3('apple','plaeap'))
-print(anagramSolution3('apple','pleaf'))
+# print(anagramSolution3('apple','pleap'))
+# print(anagramSolution3('apple','plaeap'))
+# print(anagramSolution3('apple','pleaf'))

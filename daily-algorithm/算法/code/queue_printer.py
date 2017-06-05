@@ -76,7 +76,7 @@ def newPrintTask(argslist):
     # 当随机数=180时，创建任务成功，平均180秒成功一次
     
     studentnum,perTasknum = argslist    #以一个列表传入学生数和每个学生打印的次数
-    new_task_time = 3600/(studentnum*perTasknum)
+    new_task_time = 3600//(studentnum*perTasknum)
     num = random.randrange(1,new_task_time+1)
     return num == new_task_time
     
