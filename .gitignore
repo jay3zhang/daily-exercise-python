@@ -7,3 +7,4 @@ LICENSE
 *.png
 daily-algorithm/algoenv
 daily-algorithm/pythonTip/test.py
+test.py

@@ -57,3 +57,19 @@ def anagramSolution3(s1,s2):
 # print(anagramSolution3('apple','pleap'))
 # print(anagramSolution3('apple','plaeap'))
 # print(anagramSolution3('apple','pleaf'))
+
+def anagramSolution4(s1,s2):    # 任意字符组成的字符串
+    c1 = [0]*256
+    c2 = [0]*256
+    
+    for i in s1:
+        c1[ord(i)] += 1
+    for i in s2:
+        c2[ord(i)] += 1
+    
+    stillOK = False
+    if c1==c2:
+        stillOK = True
+        
+    return stillOK
+        
